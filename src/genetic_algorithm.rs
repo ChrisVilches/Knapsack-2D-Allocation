@@ -190,33 +190,17 @@ fn generate_new_population(survived_solutions: &mut Vec<&Vec<i64>>) -> Vec<Vec<i
   result
 }
 
-#[derive(Copy, Clone)]
 pub struct GeneticAlgorithm {
+  pub stopped: bool
 }
 
-/**
- * TODO: Probably one of the worst things about this program is
- * the use of this global variable. It must be a local variable,
- * but it's tricky to pass it to the closure that handles SIGNAL.
- * For now, just leave it here, but be careful.
- */
-static mut STOPPED: bool = false;
-
 impl GeneticAlgorithm {
-  pub fn new() -> GeneticAlgorithm {
-    GeneticAlgorithm {}
-  }
-
   pub fn stop(&mut self){
-    unsafe {
-      STOPPED = true;
-    }
+    self.stopped = true;
   }
 
   pub fn is_stopped(&self) -> bool{
-    unsafe {
-      STOPPED
-    }
+    self.stopped
   }
 
   pub fn execute_algorithm(&self, container: &Container, items: &Vec<Item>, stats: &mut Stats){

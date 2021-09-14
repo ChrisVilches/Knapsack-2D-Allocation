@@ -131,25 +131,31 @@ fn build_scenario_from_opts() -> (Container, Vec<Item>) {
   }
 }
 
+// There are some issues implementing a "new" method.
+static mut GENETIC_ALGORITHM: GeneticAlgorithm = GeneticAlgorithm { stopped: false };
+
 fn main() {
   let (container, items) = build_scenario_from_opts();
   let mut stats = Stats::new(&items);
-  let mut genetic_algorithm = GeneticAlgorithm::new();
 
   println!("Items: {}", items.len());
   println!("Max score assuming infinite container: {}", stats.max_possible_score);
 
   ctrlc::set_handler(move || {
-    if !genetic_algorithm.is_stopped() {
-      println!();
-      println!("Stopping execution...");
-      println!();
+    unsafe {
+      if !GENETIC_ALGORITHM.is_stopped() {
+        println!();
+        println!("Stopping execution...");
+        println!();
+      }
+      GENETIC_ALGORITHM.stop();
     }
-    genetic_algorithm.stop();
   })
   .expect("Error setting Ctrl-C handler");
 
-  genetic_algorithm.execute_algorithm(&container, &items, &mut stats);
+  unsafe {
+    GENETIC_ALGORITHM.execute_algorithm(&container, &items, &mut stats);
+  }
 
   print_stats(&stats);
 }
