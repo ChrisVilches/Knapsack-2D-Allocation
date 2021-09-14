@@ -2,9 +2,11 @@
 
 Algorithm to solve the 2D rectangle knapsack. Try to fit as many 2D items as possible, while maximizing the value each item provides.
 
-<img src="./resident_evil.jpg"></img>
+<p align="center">
+  <img src="./resident_evil.jpg"></img>
+</p>
 
-Picture taken from Resident Evil 4. The player must organize the inventory to fit important items (unlike most games, it doesn't have an *infinite Pocket*).
+Picture taken from Resident Evil 4. The player must organize the inventory to fit important items (unlike most games, it doesn't have an *infinite pocket*).
 
 ## Specifications
 
@@ -26,7 +28,9 @@ cargo run --release -- random --container-square-side 20 --item-count 160 --item
 
 In this example, the optimal value goes from 149 to 207 in ~1500 generations. An image is also generated to visualize result.
 
-<img src="./readme_output_example.png"></img>
+<p align="center">
+  <img src="./readme_output_example.png"></img>
+</p>
 
 ```
 Gen #0 | Best score: 149 | Gen avg: 114.17 | Current optimal: 149 | Optimal ID: 05566633821962aa9d8f5c4a3eaa5b3d | Wasted room: 4
@@ -41,7 +45,7 @@ Gen #1058 | Best score: 192 | Gen avg: 86.28 | Current optimal: 209 | Optimal ID
 ...
 Gen #1509 | Best score: 207 | Gen avg: 101.49 | Current optimal: 214 | Optimal ID: 9a2e12dd39ef38787ebb47aba54e13b5 | Wasted room: 11
 
-# Press CTRL + C to stop
+# Press CTRL+C to stop
 Stopping...
 
 Gen #1510 | Best score: 207 | Gen avg: 111.95 | Current optimal: 214 | Optimal ID: 9a2e12dd39ef38787ebb47aba54e13b5 | Wasted room: 11
@@ -89,3 +93,8 @@ The next `number of items` lines contain three integers each, `item width`, `ite
 ```bash
 cargo run --release -- file --file-input input_file.txt
 ```
+
+## Issues & To-Do
+
+* Fix many `TODO:` comments in the source code (mostly refactoring).
+* When the global optimal value is found (i.e. when all items fit in the container), the program stops without creating an image. This is due to conflicts in Rust's memory management from two threads (main program and thread that handles the CTRL+C signal). Can be fixed but it's a bit hacky (by placing the objects in the static lifetime). For now, the image is only created when stopping execution using CTRL+C (before the global optimal is found).
