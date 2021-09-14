@@ -1,3 +1,4 @@
+#[derive(Copy, Clone)]
 pub struct Container {
   pub width: i64,
   pub height: i64

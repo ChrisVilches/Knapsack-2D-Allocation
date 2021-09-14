@@ -130,7 +130,7 @@ lazy_static! {
 fn main() {
   let (container, items): (Container, Vec<Item>) = build_scenario_from_opts();
   let mut genetic_algorithm: GeneticAlgorithm = GeneticAlgorithm::new(container, &items);
-  STATS.lock().unwrap().initialize(&items);
+  STATS.lock().unwrap().initialize(&container, &items);
 
   println!("Items: {}", items.len());
   println!("Max score assuming infinite container: {}", STATS.lock().unwrap().max_possible_score);
