@@ -7,9 +7,12 @@ use rand::seq::SliceRandom;
 use md5;
 use std::collections::HashSet;
 
+// TODO: Creation of offspring can be improved.
 // TODO: Some functions should be put inside the GeneticAlgorithm struct.
 // TODO: Some stuff is stored in "Stats" and some other stuff in "GeneticAlgorithm". Make it consistent.
 // TODO: Change some types to smaller types (e.g. i64 -> i16).
+// TODO: Implement something like https://jp.mathworks.com/help/gads/genetic-algorithm-options.html#f9147
+//       For scaling (and possibly improving) fitness values.
 
 fn crossover(list1: &Vec<i64>, list2: &Vec<i64>, cross_probability: f32) -> Vec<i64> {
   if list1.len() != list2.len() {
@@ -84,8 +87,8 @@ fn item_fits(filled: &Vec<Vec<i64>>, item: &Item, row: i64, col: i64) -> bool {
   let rows: i64 = filled.len() as i64;
   let cols: i64 = filled[0].len() as i64;
 
-  if (row + item.height) >= rows { return false; }
-  if (col + item.width) >= cols { return false; }
+  if (row + item.height) > rows { return false; }
+  if (col + item.width) > cols { return false; }
 
   for i in row..(row + item.height) {
     for j in col..(col + item.width) {
@@ -137,6 +140,7 @@ fn score(container: &Container, items: &[Item], solution: &Vec<i64>) -> (i64, i6
       Some(values) => {
         total_benefit += item.benefit;
         let (row, col) = values;
+        // Mark all cells as used.
         // TODO: Something faster like fill or memset would be better.
         for i in row..(row + item.height) {
           for j in col..(col + item.width) {
@@ -213,7 +217,7 @@ impl GeneticAlgorithm {
     }
   }
 
-  pub fn execute_population(&mut self, stats: &mut Stats){ 
+  pub fn execute_population(&mut self, stats: &mut Stats) -> bool{ 
     let mut all_scores = Vec::<i64>::new();
 
     // Solutions that survived.
@@ -242,9 +246,14 @@ impl GeneticAlgorithm {
       stats.optimal_found_gens.push(stats.total_generations);
       stats.store_optimal_solution(tuples[0].0);
 
+      // For now, this program doesn't try to minimize wasted room.
+      // So even if it's 0, that doesn't mean it's the optimal value.
+      // if stats.optimal_wasted == 0 {
+      //   return true;
+      // }
+
       if stats.optimal_best_score == stats.max_possible_score {
-        println!("Global optimum was found");
-        return;
+        return true;
       }
     }
 
@@ -265,5 +274,7 @@ impl GeneticAlgorithm {
     println!("Gen #{} | Best score: {} | Gen avg: {:.2} | Current optimal: {} | Optimal ID: {} | Wasted room: {}", stats.total_generations, gen_best_score, math::mean(&all_scores), stats.optimal_best_score, stats.optimal_hash, stats.optimal_wasted);
 
     stats.total_generations += 1;
+
+    return false;
   }
 }

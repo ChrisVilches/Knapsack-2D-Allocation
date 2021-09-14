@@ -17,8 +17,8 @@ impl Item {
   }
 
   pub fn make_random(w: i64, h: i64, benefit: i64) -> Item {
-    let rand_w = rand::thread_rng().gen_range(0..w);
-    let rand_h = rand::thread_rng().gen_range(0..h);
+    let rand_w = rand::thread_rng().gen_range(1..w);
+    let rand_h = rand::thread_rng().gen_range(1..h);
     let rand_benefit = rand::thread_rng().gen_range(0..benefit);
     Item::new(rand_w, rand_h, rand_benefit)
   }

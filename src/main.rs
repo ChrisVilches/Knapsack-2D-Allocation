@@ -7,6 +7,7 @@ mod types;
 mod math;
 mod genetic_algorithm;
 mod util;
+mod image_writer;
 
 use genetic_algorithm::GeneticAlgorithm;
 use types::item::Item;
@@ -141,12 +142,20 @@ fn main() {
     println!("");
     let stats = STATS.lock().unwrap();
     stats.print();
+    image_writer::create_image("output.png".to_string(), &container, &items, &stats.optimal_solution);
     std::process::exit(0);
   })
   .expect("Error setting Ctrl-C handler");
 
   loop {
     let mut stats = STATS.lock().unwrap();
-    genetic_algorithm.execute_population(&mut stats);
+    let global_optimum_found: bool = genetic_algorithm.execute_population(&mut stats);
+
+    if global_optimum_found {
+      stats.print();
+      println!("Global optimum found.");
+      // image_writer::create_image("output.png".to_string(), &container, &items, &stats.optimal_solution);
+      break;
+    }
   }
 }
