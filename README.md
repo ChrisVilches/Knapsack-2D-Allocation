@@ -1,6 +1,6 @@
 # Knapsack 2D Allocation
 
-Algorithm to solve the 2D rectangle knapsack. Try to fit as many 2D items as possible, while maximizing the value each item provides.
+Genetic algorithm that solves the 2D rectangle knapsack problem. Try to fit as many rectangular items as possible inside a container, while maximizing the total value the items provide.
 
 <p align="center">
   <img src="./resident_evil.jpg"></img>
