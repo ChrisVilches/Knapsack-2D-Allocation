@@ -7,6 +7,8 @@ use rand::seq::SliceRandom;
 use md5;
 use std::collections::HashSet;
 
+// TODO: Some functions should be put inside the GeneticAlgorithm struct.
+// TODO: Some stuff is stored in "Stats" and some other stuff in "GeneticAlgorithm". Make it consistent.
 // TODO: Change some types to smaller types (e.g. i64 -> i16).
 
 fn crossover(list1: &Vec<i64>, list2: &Vec<i64>, cross_probability: f32) -> Vec<i64> {
@@ -191,84 +193,77 @@ fn generate_new_population(survived_solutions: &mut Vec<&Vec<i64>>) -> Vec<Vec<i
 }
 
 pub struct GeneticAlgorithm {
-  pub stopped: bool
+  items: Vec<Item>,
+  solutions: Vec::<Vec<i64>>,
+  container: Container
 }
 
 impl GeneticAlgorithm {
-  pub fn stop(&mut self){
-    self.stopped = true;
-  }
-
-  pub fn is_stopped(&self) -> bool{
-    self.stopped
-  }
-
-  pub fn execute_algorithm(&self, container: &Container, items: &Vec<Item>, stats: &mut Stats){
-    // List of solutions.
+  pub fn new(container: Container, items: &Vec<Item>) -> GeneticAlgorithm {
     let mut solutions = Vec::<Vec<i64>>::new();
 
-    // Create initial solution set.
     for _ in 0..100 {
       solutions.push(random_solution(items.len() as i64));
     }
 
-    // For each population.
-    loop {   
-      let mut all_scores = Vec::<i64>::new();
-
-      // Solutions that survived.
-      let mut survived_solutions = Vec::<&Vec<i64>>::new();
-      let mut survived_scores = Vec::<i64>::new();
-
-      // List of solution and score (which is also a tuple).
-      let mut tuples = Vec::<(&Vec<i64>, (i64, i64))>::new();
-
-      // Eval many solutions.
-      for solution in &solutions {
-        let score = score(&container, &items, &solution);
-        all_scores.push(score.0);
-        tuples.push((&solution, score));
-      }
-
-      tuples.sort_by_key(|k| k.1);
-      tuples.reverse();
-      let gen_best_score: i64 = tuples[0].1.0;
-
-      // New optimal found.
-      if gen_best_score > stats.optimal_best_score {
-        stats.optimal_best_score = gen_best_score;
-        stats.optimal_hash = format!("{:?}", md5::compute(format!("{:?}", tuples[0].0)));
-        stats.optimal_wasted = tuples[0].1.1;
-        stats.optimal_found_gens.push(stats.total_generations);
-
-        if stats.optimal_best_score == stats.max_possible_score {
-          println!("Global optimum was found");
-          return;
-        }
-      }
-
-      let stddev: f64 = math::standard_deviation(&all_scores);
-
-      for tuple in &tuples {
-        // Ensure a minimum number of solutions.
-        if survived_solutions.len() < 10 || tuple.1.0 > (stddev as i64) {
-          survived_solutions.push(tuple.0);
-          survived_scores.push(tuple.1.0);
-        } else {
-          break;
-        }
-      }
-
-      let new_population = generate_new_population(&mut survived_solutions);
-      solutions = new_population;
-
-      if self.is_stopped() || stats.total_generations > 10000{
-        return;
-      } else {
-        println!("Gen #{} | Best score: {} | Gen avg: {:.2} | Current optimal: {} | Optimal ID: {} | Wasted room: {}", stats.total_generations, gen_best_score, math::mean(&all_scores), stats.optimal_best_score, stats.optimal_hash, stats.optimal_wasted);
-      }
-
-      stats.total_generations += 1;
+    GeneticAlgorithm {
+      items: items.to_vec(),
+      solutions: solutions,
+      container: container
     }
+  }
+
+  pub fn execute_population(&mut self, stats: &mut Stats){ 
+    let mut all_scores = Vec::<i64>::new();
+
+    // Solutions that survived.
+    let mut survived_solutions = Vec::<&Vec<i64>>::new();
+    let mut survived_scores = Vec::<i64>::new();
+
+    // List of solution and score (which is also a tuple).
+    let mut tuples = Vec::<(&Vec<i64>, (i64, i64))>::new();
+
+    // Eval many solutions.
+    for solution in &self.solutions {
+      let score = score(&self.container, &self.items, &solution);
+      all_scores.push(score.0);
+      tuples.push((&solution, score));
+    }
+
+    tuples.sort_by_key(|k| k.1);
+    tuples.reverse();
+    let gen_best_score: i64 = tuples[0].1.0;
+
+    // New optimal found.
+    if gen_best_score > stats.optimal_best_score {
+      stats.optimal_best_score = gen_best_score;
+      stats.optimal_hash = format!("{:?}", md5::compute(format!("{:?}", tuples[0].0)));
+      stats.optimal_wasted = tuples[0].1.1;
+      stats.optimal_found_gens.push(stats.total_generations);
+      stats.store_optimal_solution(tuples[0].0);
+
+      if stats.optimal_best_score == stats.max_possible_score {
+        println!("Global optimum was found");
+        return;
+      }
+    }
+
+    let stddev: f64 = math::standard_deviation(&all_scores);
+
+    for tuple in &tuples {
+      // Ensure a minimum number of solutions.
+      if survived_solutions.len() < 10 || tuple.1.0 > (stddev as i64) {
+        survived_solutions.push(tuple.0);
+        survived_scores.push(tuple.1.0);
+      } else {
+        break;
+      }
+    }
+
+    self.solutions = generate_new_population(&mut survived_solutions);
+
+    println!("Gen #{} | Best score: {} | Gen avg: {:.2} | Current optimal: {} | Optimal ID: {} | Wasted room: {}", stats.total_generations, gen_best_score, math::mean(&all_scores), stats.optimal_best_score, stats.optimal_hash, stats.optimal_wasted);
+
+    stats.total_generations += 1;
   }
 }

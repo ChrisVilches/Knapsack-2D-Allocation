@@ -1,5 +1,6 @@
 use rand::Rng;
 
+#[derive(Copy, Clone)]
 pub struct Item {
   pub width: i64,
   pub height: i64,

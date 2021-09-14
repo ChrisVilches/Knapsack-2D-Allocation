@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate lazy_static;
 extern crate clap;
 extern crate text_io;
 
@@ -14,17 +16,7 @@ use types::stats::Stats;
 use clap::{Arg, App, AppSettings, SubCommand};
 use text_io::read;
 use std::io::Read;
-
-fn print_stats(stats: &Stats){
-  println!("Max score assuming infinite container: {}", stats.max_possible_score);
-  println!("Total generations: {}", stats.total_generations);
-  println!("Current optimal: {}", stats.optimal_best_score);
-  println!("Optimal ID: {}", stats.optimal_hash);
-  println!("Wasted room: {}", stats.optimal_wasted);
-  println!("Generations where local optimals were found: {:?}", stats.optimal_found_gens);
-}
-
-// TODO: Remove this shit static mut STOPPED_EXECUTION: bool = false;
+use std::sync::Mutex;
 
 fn random_scenario(container_square_size: i64, item_count: i64, item_max_side: i64, item_max_benefit: i64) -> (Container, Vec<Item>) {
   util::ensure_positive(container_square_size);
@@ -131,31 +123,30 @@ fn build_scenario_from_opts() -> (Container, Vec<Item>) {
   }
 }
 
-// There are some issues implementing a "new" method.
-static mut GENETIC_ALGORITHM: GeneticAlgorithm = GeneticAlgorithm { stopped: false };
+lazy_static! {
+  static ref STATS: Mutex<Stats> = Mutex::new(Stats::new());
+}
 
 fn main() {
-  let (container, items) = build_scenario_from_opts();
-  let mut stats = Stats::new(&items);
+  let (container, items): (Container, Vec<Item>) = build_scenario_from_opts();
+  let mut genetic_algorithm: GeneticAlgorithm = GeneticAlgorithm::new(container, &items);
+  STATS.lock().unwrap().initialize(&items);
 
   println!("Items: {}", items.len());
-  println!("Max score assuming infinite container: {}", stats.max_possible_score);
+  println!("Max score assuming infinite container: {}", STATS.lock().unwrap().max_possible_score);
 
   ctrlc::set_handler(move || {
-    unsafe {
-      if !GENETIC_ALGORITHM.is_stopped() {
-        println!();
-        println!("Stopping execution...");
-        println!();
-      }
-      GENETIC_ALGORITHM.stop();
-    }
+    println!("");
+    println!("Stopping...");
+    println!("");
+    let stats = STATS.lock().unwrap();
+    stats.print();
+    std::process::exit(0);
   })
   .expect("Error setting Ctrl-C handler");
 
-  unsafe {
-    GENETIC_ALGORITHM.execute_algorithm(&container, &items, &mut stats);
+  loop {
+    let mut stats = STATS.lock().unwrap();
+    genetic_algorithm.execute_population(&mut stats);
   }
-
-  print_stats(&stats);
 }
