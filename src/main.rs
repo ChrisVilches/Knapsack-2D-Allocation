@@ -1,4 +1,3 @@
-extern crate lazy_static;
 extern crate clap;
 extern crate text_io;
 
@@ -18,23 +17,41 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 use signal_hook::flag;
-use signal_hook::consts::signal::*;
 use signal_hook::consts::TERM_SIGNALS;
 use signal_hook::iterator::Signals;
 use crossbeam;
+
+fn set_signal_handler(term_now: &Arc<AtomicBool>) -> Result<(), Error> {
+  let mut signals: Signals = Signals::new(TERM_SIGNALS)?;
+  for sig in TERM_SIGNALS {
+    // Terminate with 2 signals. (This would only be notorious if we add a "sleep" after each generation.)
+    // Since generations execute fast, there's no delay
+    // when pressing CTRL+C, but if this line is removed and a "sleep" is added
+    // in the generations loop, and we press CTRL+C several times, it would not exit.
+    // Having this line "forces" the termination when executing the second termination.
+    // More info: https://docs.rs/signal-hook/0.3.10/signal_hook/#a-complex-signal-handling-with-a-background-thread
+    flag::register_conditional_shutdown(*sig, 1, Arc::clone(&term_now))?;
+    flag::register(*sig, Arc::clone(&term_now))?;
+  }
+  for signal in &mut signals {
+    eprintln!("\nReceived a signal {:?}", signal);
+    match signal {
+      term_sig => {
+        eprintln!("\nTerminating");
+        assert!(TERM_SIGNALS.contains(&term_sig));
+        break;
+      }
+    }
+  }
+
+  Ok(())
+}
 
 fn main() -> Result<(), Error> {
   let (container, items): (Container, Vec<Item>) = dataset_loader::build_scenario_from_opts()?;
   let mut genetic_algorithm: GeneticAlgorithm = GeneticAlgorithm::new(container, &items);
   let mut stats: Stats = Stats::new(&items);
   let term_now = Arc::new(AtomicBool::new(false));
-  let mut signals: Signals = Signals::new(TERM_SIGNALS)?;
-
-  for sig in TERM_SIGNALS {
-    // Terminate with 2 signals.
-    flag::register_conditional_shutdown(*sig, 1, Arc::clone(&term_now))?;
-    flag::register(*sig, Arc::clone(&term_now))?;
-  }
 
   println!("Items: {}", items.len());
   println!("Max score assuming infinite container: {}", stats.max_possible_score);
@@ -51,29 +68,10 @@ fn main() -> Result<(), Error> {
 
       stats.print();
       image_writer::create_image("output.png".to_string(), &container, &items, &stats.optimal_solution);
-      std::process::exit(0);
     });
 
     scope.spawn(|_| {
-      //'outer: loop {
-        //println!("INFINITE LOOP");
-        for signal in signals.pending() {
-          match signal {
-            SIGINT => {
-              println!("\n(SIGINT) Stopping...");
-              break;// 'outer;
-            },
-            SIGTERM => {
-              println!("\n(SIGTERM) Stopping...");
-              break;// 'outer;
-            },
-            term_sig => {
-              println!("\nSignal: {:?}", term_sig);
-              break;// 'outer;
-            }
-          }
-        //}
-      }
+      set_signal_handler(&term_now).unwrap();
     });
   }).expect("threads did not complete successfully");
 

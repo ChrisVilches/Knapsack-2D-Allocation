@@ -92,10 +92,10 @@ pub fn build_scenario_from_opts() -> std::io::Result<(Container, Vec<Item>)> {
   match matches.subcommand() {
     ("random", Some(matches)) => {
       Ok(random_scenario(
-        util::parse(matches.value_of("container square side")),
-        util::parse(matches.value_of("item count")),
-        util::parse(matches.value_of("item max square side")),
-        util::parse(matches.value_of("max benefit"))
+        util::parse::<i64>(matches.value_of("container square side")),
+        util::parse::<i64>(matches.value_of("item count")),
+        util::parse::<i64>(matches.value_of("item max square side")),
+        util::parse::<i64>(matches.value_of("max benefit"))
       ))
     },
     ("file", Some(matches)) => {

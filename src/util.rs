@@ -1,8 +1,10 @@
-// TODO: Should be <T>.
-pub fn parse(s: Option<&str>) -> i64 {
+extern crate num_traits;
+use num_traits::int::PrimInt;
+
+pub fn parse<N: PrimInt + std::str::FromStr>(s: Option<&str>) -> N {
   match s {
     Some(string) => {
-      match string.parse::<i64>() {
+      match N::from_str(string) {
         Ok(n) => n,
         Err(_e) => {
           panic!("Option value is not a number")
@@ -11,7 +13,7 @@ pub fn parse(s: Option<&str>) -> i64 {
     },
     None => {
       // Value is required. This case never happens.
-      0
+      panic!();
     }
   }
 }
