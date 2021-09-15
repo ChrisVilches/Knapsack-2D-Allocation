@@ -5,11 +5,11 @@ Genetic algorithm that solves the 2D rectangle knapsack problem. Try to fit as m
 Example (visual output):
 
 <p align="center">
-  <img src="./example_big.jpg"></img>
+  <img src="./example_big.jpg" width="256" title="Visual output example"></img>
 </p>
 
 <p align="center">
-  <img src="./resident_evil.jpg"></img>
+  <img src="./resident_evil.jpg" width="256" title="Resident Evil inventory"></img>
 </p>
 
 Picture above is taken from Resident Evil 4. The player must organize the inventory to fit important items (unlike most games, it doesn't have an *infinite pocket*).
@@ -35,7 +35,7 @@ cargo run --release -- random --container-square-side 20 --item-count 160 --item
 In this example, the optimal value goes from 149 to 207 in ~1500 generations. An image is also generated to visualize the result.
 
 <p align="center">
-  <img src="./readme_output_example.png"></img>
+  <img src="./readme_output_example.png" width="256" title="Random example output"></img>
 </p>
 
 Output log:
