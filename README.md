@@ -9,10 +9,10 @@ Example (visual output):
 </p>
 
 <p align="center">
-  <img src="./resident_evil.jpg" width="256" title="Resident Evil inventory"></img>
+  <img src="./resident_evil.jpg" width="400" title="Resident Evil inventory"></img>
 </p>
 
-Picture above is taken from Resident Evil 4. The player must organize the inventory to fit important items (unlike most games, it doesn't have an *infinite pocket*).
+Picture above is taken from Resident Evil 4. The player must organize the inventory to fit important items (unlike most games, it doesn't have an *infinite pocket*). This algorithm follows the same concept
 
 ## Specifications
 
