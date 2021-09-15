@@ -5,7 +5,7 @@ Genetic algorithm that solves the 2D rectangle knapsack problem. Try to fit as m
 Example (visual output):
 
 <p align="center">
-  <img src="./example_big.jpg" width="256" title="Visual output example"></img>
+  <img src="./example_big.jpg" width="350" title="Visual output example"></img>
 </p>
 
 <p align="center">
