@@ -1,5 +1,4 @@
 use super::item::Item;
-use super::container::Container;
 
 pub struct Stats {
   pub max_possible_score: i64,
@@ -8,15 +7,18 @@ pub struct Stats {
   pub optimal_hash: String,
   pub optimal_wasted: i64,
   pub optimal_found_gens: Vec<i64>,
-  pub optimal_solution: Vec<i64>,
-  container: Container
+  pub optimal_solution: Vec<i64>
 }
 
 impl Stats {
-  pub fn new() -> Stats {
+  pub fn new(items: &Vec<Item>) -> Stats {
+    let mut max_possible_score: i64 = 0;
+    for item in items {
+      max_possible_score += item.benefit;
+    }
+
     Stats {
-      container: Container::new(0, 0),
-      max_possible_score: 0,
+      max_possible_score: max_possible_score,
       total_generations: 0,
       optimal_best_score: 0,
       optimal_hash: String::new(),
@@ -24,16 +26,6 @@ impl Stats {
       optimal_found_gens: Vec::<i64>::new(),
       optimal_solution: Vec::<i64>::new()
     }
-  }
-
-  pub fn initialize(&mut self, container: &Container, items: &Vec<Item>) {
-    let mut max_possible_score: i64 = 0;
-    for item in items {
-      max_possible_score += item.benefit;
-    }
-
-    self.max_possible_score = max_possible_score;
-    self.container = *container;
   }
 
   pub fn store_optimal_solution(&mut self, solution: &Vec<i64>) {

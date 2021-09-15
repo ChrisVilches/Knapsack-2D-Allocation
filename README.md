@@ -26,7 +26,7 @@ Generate a random scenario:
 cargo run --release -- random --container-square-side 20 --item-count 160 --item-max-square-side 11 --max-benefit 10
 ```
 
-In this example, the optimal value goes from 149 to 207 in ~1500 generations. An image is also generated to visualize result.
+In this example, the optimal value goes from 149 to 207 in ~1500 generations. An image is also generated to visualize the result.
 
 <p align="center">
   <img src="./readme_output_example.png"></img>
