@@ -38,7 +38,7 @@ impl Stats {
     println!("Current optimal: {}", self.optimal_best_score);
     println!("Optimal ID: {}", self.optimal_hash);
     println!("Wasted room: {}", self.optimal_wasted);
-    println!("Generations where local optimals were found: {:?}", self.optimal_found_gens);
+    println!("Generations where local optimums were found: {:?}", self.optimal_found_gens);
     println!("Best solution found: {:?}", self.optimal_solution);
   }
 }
