@@ -4,8 +4,8 @@ extern crate text_io;
 mod types;
 mod math;
 mod genetic_algorithm;
-mod util;
 mod image_writer;
+mod util;
 mod dataset_loader;
 
 use genetic_algorithm::GeneticAlgorithm;

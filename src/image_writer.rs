@@ -1,40 +1,10 @@
 extern crate image;
+use super::util;
 use super::types::item::Item;
 use super::types::container::Container;
 use image::RgbImage;
 
 static TILE_SIZE: i64 = 10;
-
-// TODO: Duplicated code from genetic algorithm file.
-fn item_fits(filled: &Vec<Vec<i64>>, item: &Item, row: i64, col: i64) -> bool {
-  let rows: i64 = filled.len() as i64;
-  let cols: i64 = filled[0].len() as i64;
-
-  if (row + item.height) > rows { return false; }
-  if (col + item.width) > cols { return false; }
-
-  for i in row..(row + item.height) {
-    for j in col..(col + item.width) {
-      if filled[i as usize][j as usize] == 1 {
-        return false;
-      }
-    }
-  }
-
-  return true;
-}
-
-fn first_empty_space(filled: &Vec<Vec<i64>>, item: &Item) -> Option<(i64, i64)> {
-  for i in 0..filled.len() {
-    for j in 0..filled[i].len() {
-      if item_fits(filled, item, i as i64, j as i64) {
-        return Some((i as i64, j as i64));
-      }
-    }
-  }
-
-  None
-}
 
 fn draw_solution(img: &mut RgbImage, container: &Container, items: &[Item], solution: &Vec<i64>) {
   let mut filled = vec![vec![0; container.width as usize]; container.height as usize];
@@ -43,7 +13,7 @@ fn draw_solution(img: &mut RgbImage, container: &Container, items: &[Item], solu
   for i in 0..solution.len() {
     let item_idx = solution[i] as usize;
     let item = &items[item_idx];
-    let tuple = first_empty_space(&filled, item);
+    let tuple = util::first_empty_space(&filled, item);
     match tuple {
       Some(values) => {
         let (row, col) = values;

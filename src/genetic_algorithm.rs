@@ -1,6 +1,7 @@
 use super::types::item::Item;
 use super::types::container::Container;
 use super::types::stats::Stats;
+use super::util;
 use super::math;
 use rand::Rng;
 use rand::seq::SliceRandom;
@@ -83,36 +84,6 @@ fn random_solution(n: i64) -> Vec<i64> {
   sol
 }
 
-fn item_fits(filled: &Vec<Vec<i64>>, item: &Item, row: i64, col: i64) -> bool {
-  let rows: i64 = filled.len() as i64;
-  let cols: i64 = filled[0].len() as i64;
-
-  if (row + item.height) > rows { return false; }
-  if (col + item.width) > cols { return false; }
-
-  for i in row..(row + item.height) {
-    for j in col..(col + item.width) {
-      if filled[i as usize][j as usize] == 1 {
-        return false;
-      }
-    }
-  }
-
-  return true;
-}
-
-fn first_empty_space(filled: &Vec<Vec<i64>>, item: &Item) -> Option<(i64, i64)> {
-  for i in 0..filled.len() {
-    for j in 0..filled[i].len() {
-      if item_fits(filled, item, i as i64, j as i64) {
-        return Some((i as i64, j as i64));
-      }
-    }
-  }
-
-  None
-}
-
 fn count_zeros(filled: &Vec<Vec<i64>>) -> i64 {
   let mut total = 0;
   for i in 0..filled.len() {
@@ -135,7 +106,7 @@ fn score(container: &Container, items: &[Item], solution: &Vec<i64>) -> (i64, i6
   for i in 0..solution.len() {
     let item_idx = solution[i] as usize;
     let item = &items[item_idx];
-    let tuple = first_empty_space(&filled, item);
+    let tuple = util::first_empty_space(&filled, item);
     match tuple {
       Some(values) => {
         total_benefit += item.benefit;
